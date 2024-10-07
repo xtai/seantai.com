@@ -153,5 +153,4 @@ function parseColor(hex) {
   return { r, g, b };
 }
 
-// Initialize the slider and background gradient on page load
 initialize();
