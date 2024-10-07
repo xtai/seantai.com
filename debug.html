@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Color Gradient Debugger</title>
+    <style>
+      #gradient-editor {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        width: 100%;
+      }
+      .gradient-container {
+        flex: 1;
+        max-width: calc(100% / 5 - 20px);
+        margin-bottom: 20px;
+        text-align: center;
+        box-sizing: border-box;
+      }
+      .gradient-preview {
+        width: 100%;
+        height: 300px;
+        margin: 10px 0;
+        background: linear-gradient(to bottom, #000, #fff);
+        display: block;
+      }
+      .color-value {
+        font-family: monospace;
+      }
+      .color-input-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="gradient-editor"></div>
+    <pre id="json-output"></pre>
+
+    <script>
+      const timings = {
+        firstLight: 300,
+        dawn: 400,
+        sunrise: 500,
+        solarNoon: 750,
+        sunset: 1000,
+        dusk: 1100,
+        lastLight: 1200
+      };
+
+      const colorGradients = [
+        { time: 0, colors: ['#131731', '#2c407d'] }, // Midnight
+        { time: timings.firstLight - 30, colors: ['#1a1f4a', '#3c518b'] }, // First light - 30
+        { time: timings.firstLight, colors: ['#0c2e64', '#93b1d5'] }, // First light
+        { time: timings.dawn, colors: ['#3c518b', '#ff9a76'] }, // Dawn
+        { time: timings.sunrise, colors: ['#a8b7cc', '#ffa300'] }, // Sunrise
+        { time: timings.sunrise + 30, colors: ['#4b70a7', '#e4d4c5'] }, // Sunrise + 30
+        { time: timings.sunrise + 60, colors: ['#254a82', '#8cb3dd'] }, // Sunrise + 60
+        { time: timings.solarNoon, colors: ['#034c8f', '#79ace4'] }, // Solar Noon
+        { time: timings.sunset - 60, colors: ['#254a82', '#8cb3dd'] }, // Sunset - 60
+        { time: timings.sunset - 30, colors: ['#4a71a8', '#e4d4c6'] }, // Sunset - 30
+        { time: timings.sunset, colors: ['#a7b6cb', '#f3834c'] }, // Sunset
+        { time: timings.dusk, colors: ['#6667a8', '#fc9179'] }, // Dusk
+        { time: timings.lastLight, colors: ['#213e6e', '#bf808a'] }, // Last light
+        { time: timings.lastLight + 30, colors: ['#1a204a', '#3d518b'] }, // Last light + 30
+        { time: 1440, colors: ['#131731', '#2c407d'] } // Midnight
+      ];
+
+      const container = document.getElementById('gradient-editor');
+      const jsonOutput = document.getElementById('json-output');
+
+      function updateJsonOutput() {
+        jsonOutput.textContent = `const colors = ${JSON.stringify(colorGradients, null, 2)};`;
+      }
+
+      function createGradientEditor() {
+        colorGradients.forEach((gradient, index) => {
+          const gradientContainer = document.createElement('div');
+          gradientContainer.className = 'gradient-container';
+
+          const label = document.createElement('div');
+          label.textContent = `${
+            [
+              'Midnight',
+              'First light - 30',
+              'First light',
+              'Dawn',
+              'Sunrise',
+              'Sunrise + 30',
+              'Sunrise + 60',
+              'Solar Noon',
+              'Sunset - 60',
+              'Sunset - 30',
+              'Sunset',
+              'Dusk',
+              'Last light',
+              'Last light + 30',
+              'Midnight'
+            ][index]
+          }`;
+          gradientContainer.appendChild(label);
+
+          const colorInputs = [];
+          gradient.colors.forEach((color, colorIndex) => {
+            const colorInputContainer = document.createElement('div');
+            colorInputContainer.className = 'color-input-container';
+
+            const colorInput = document.createElement('input');
+            colorInput.type = 'color';
+            colorInput.value = color;
+            colorInput.dataset.gradientIndex = index;
+            colorInput.dataset.colorIndex = colorIndex;
+            colorInput.addEventListener('input', (e) => {
+              const gradientIdx = e.target.dataset.gradientIndex;
+              const colorIdx = e.target.dataset.colorIndex;
+              colorGradients[gradientIdx].colors[colorIdx] = e.target.value;
+              updateJsonOutput();
+              updateGradientPreview(gradientContainer, colorInputs);
+            });
+            colorInputs.push(colorInput);
+            colorInputContainer.appendChild(colorInput);
+
+            const colorValue = document.createElement('span');
+            colorValue.className = 'color-value';
+            colorValue.textContent = color;
+            colorInput.addEventListener('input', () => {
+              colorValue.textContent = colorInput.value;
+            });
+            colorInputContainer.appendChild(colorValue);
+
+            if (colorIndex === 0) {
+              gradientContainer.appendChild(colorInputContainer);
+            }
+          });
+
+          const gradientPreview = document.createElement('div');
+          gradientPreview.className = 'gradient-preview';
+          gradientContainer.appendChild(gradientPreview);
+
+          gradient.colors.forEach((color, colorIndex) => {
+            if (colorIndex === 1) {
+              const colorInputContainer = document.createElement('div');
+              colorInputContainer.className = 'color-input-container';
+
+              const colorInput = document.createElement('input');
+              colorInput.type = 'color';
+              colorInput.value = color;
+              colorInput.dataset.gradientIndex = index;
+              colorInput.dataset.colorIndex = colorIndex;
+              colorInput.addEventListener('input', (e) => {
+                const gradientIdx = e.target.dataset.gradientIndex;
+                const colorIdx = e.target.dataset.colorIndex;
+                colorGradients[gradientIdx].colors[colorIdx] = e.target.value;
+                updateJsonOutput();
+                updateGradientPreview(gradientContainer, colorInputs);
+              });
+              colorInputs.push(colorInput);
+              colorInputContainer.appendChild(colorInput);
+
+              const colorValue = document.createElement('span');
+              colorValue.className = 'color-value';
+              colorValue.textContent = color;
+              colorInput.addEventListener('input', () => {
+                colorValue.textContent = colorInput.value;
+              });
+              colorInputContainer.appendChild(colorValue);
+
+              gradientContainer.appendChild(colorInputContainer);
+            }
+          });
+
+          updateGradientPreview(gradientContainer, colorInputs);
+          container.appendChild(gradientContainer);
+        });
+      }
+
+      function updateGradientPreview(gradientContainer, colorInputs) {
+        const colors = colorInputs.map((input) => input.value);
+        const gradientPreview = gradientContainer.querySelector('.gradient-preview');
+        if (gradientPreview) {
+          gradientPreview.style.background = `linear-gradient(to bottom, ${colorInputs[0].value}, ${colorInputs[2].value})`;
+        }
+      }
+
+      createGradientEditor();
+      updateJsonOutput();
+    </script>
+  </body>
+</html>
